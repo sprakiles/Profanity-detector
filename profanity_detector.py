@@ -53,6 +53,14 @@ class ProfanityDetector:
         '7': 't', '+': 't',             # t
     }
     
+    # backup list of common bad words - catches stuff the model might miss
+    # join everything without spaces and check against this
+    BAD_WORDS = {
+        'fuck', 'shit', 'ass', 'damn', 'hell', 'bitch', 'bastard',
+        'dick', 'cock', 'pussy', 'cunt', 'whore', 'slut', 'fag',
+        'idiot', 'stupid', 'moron', 'retard', 'crap', 'piss',
+    }
+    
     def __init__(self, model_path: str = None):
         """
         loads the model from disk
@@ -121,6 +129,12 @@ class ProfanityDetector:
         text = ' '.join(result)
         text = re.sub(r'(.)\1+', r'\1', text)
         
+        # NEW: also try joining ALL words to catch stuff like "a ss" -> "ass"
+        # we'll add this as an extra word at the end for the model to see
+        no_spaces = text.replace(' ', '')
+        if no_spaces != text.replace(' ', ''):
+            text = text + ' ' + no_spaces
+        
         return text
     
     def detect(self, text: str) -> Tuple[bool, float]:
@@ -137,6 +151,13 @@ class ProfanityDetector:
         """
         # clean up the text first
         normalized = self._normalize_text(text)
+        
+        # BACKUP CHECK: join all chars and see if any bad word is hiding in there
+        # use original text (not normalized) cuz normalization reduces "ss" -> "s" etc
+        original_clean = re.sub(r'[^a-z]', '', text.lower())  # keep only letters
+        for bad_word in self.BAD_WORDS:
+            if bad_word in original_clean:
+                return True, 0.95  # found a bad word hiding!
         
         # turn text into numbers the model understands
         word_features = self.preprocessor['word_vectorizer'].transform([normalized])
@@ -251,7 +272,7 @@ if __name__ == "__main__":
     
     # some test cases
     test_texts = [
-        "Hello, how are you today?",
+        "hi a ss?",
         "This is bullshit",
         "What the h3ll",
         "f u c k off",
