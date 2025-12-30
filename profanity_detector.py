@@ -11,7 +11,7 @@ the model can detect stuff like:
 works pretty well honestly!! got like 93% accuracy which is cool i guess
 
 author: mahmoud
-date: dec 2024
+date: dec 2025
 """
 
 import os
