@@ -44,7 +44,7 @@ print(f"profane: {is_bad}, confidence: {confidence:.1%}")
 
 ### censoring bad text
 
-this is the cool part - replaces bad text with #### (same length as original)
+this is the cool part - replaces bad text with #### (same length as original like roblox ac)
 
 ```python
 from profanity_detector import censor
